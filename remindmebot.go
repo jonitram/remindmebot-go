@@ -44,7 +44,7 @@ func errCheck(msg string, err error) {
 
 func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate) {
 	if strings.HasPrefix(message.Content, commandPrefix) {
-		fmt.Printf("ChannelID: %s Username: %s Content: %s\n", message.ChannelID, message.Author.Username, message.Content)
+		fmt.Printf("ChannelID: %s Username: %s MessageID: %s Content: %s\n", message.ChannelID, message.Author.Username, message.ID, message.Content)
 	}
 }
 
