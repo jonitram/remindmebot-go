@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -41,11 +42,21 @@ func errCheck(msg string, err error) {
 	return
 }
 
+func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate) {
+	if strings.HasPrefix(message.Content, commandPrefix) {
+		fmt.Printf("ChannelID: %s Username: %s Content: %s\n", message.ChannelID, message.Author.Username, message.Content)
+	}
+}
+
 func main() {
 	setupTokens(tokensFile)
 	discord, err := discordgo.New("Bot " + discordToken)
 	errCheck("error creating discord session", err)
 	user, err := discord.User("@me")
-	commandPrefix = "@" + user.Username + "#" + user.Discriminator
-	fmt.Println(commandPrefix)
+	commandPrefix = "<@" + user.ID + ">"
+	fmt.Printf("Command Prefix: %s\n", commandPrefix)
+	discord.AddHandler(commandHandler)
+	errCheck("Error opening connection to Discord", discord.Open())
+	defer discord.Close()
+	<-make(chan struct{})
 }
