@@ -4,18 +4,21 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 // global variables
-var discordToken string
 var tokensFile = "tokens.txt"
+var discordToken string
+var commandPrefix string
+var remindmes []string
 
-func setupTokens(fileName string) bool {
+// remindmes = append(remindmes, <thing to add>)
+
+func setupTokens(fileName string) {
 	file, err := os.Open(fileName)
-	if err != nil {
-		fmt.Printf("Error opening \"%v\" - the file does not exist\n", fileName)
-		return false
-	}
+	errCheck("Error opening \""+fileName+"\" - the file does not exist", err)
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
@@ -25,16 +28,24 @@ func setupTokens(fileName string) bool {
 		discordToken = scanner.Text()
 	}
 
-	if err := scanner.Err(); err != nil {
-		fmt.Printf("Error reading \"%v\" - the file cannot be read\n", fileName)
-		return false
-	}
+	errCheck("Error reading \""+fileName+"\" - the file cannot be read", scanner.Err())
 
-	return true
+	return
+}
+
+func errCheck(msg string, err error) {
+	if err != nil {
+		fmt.Printf("%s: %+v\n", msg, err)
+		panic(err)
+	}
+	return
 }
 
 func main() {
-	if setupTokens(tokensFile) {
-		fmt.Printf("Here is your discord token - %v\n", discordToken)
-	}
+	setupTokens(tokensFile)
+	discord, err := discordgo.New("Bot " + discordToken)
+	errCheck("error creating discord session", err)
+	user, err := discord.User("@me")
+	commandPrefix = "@" + user.Username + "#" + user.Discriminator
+	fmt.Println(commandPrefix)
 }
