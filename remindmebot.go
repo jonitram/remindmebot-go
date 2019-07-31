@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/araddon/dateparse"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -80,24 +81,44 @@ func messageHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 		fmt.Printf("GuildID: %s ChannelID: %s Timestamp: %s Username: %s MessageID: %s Content: %s Current Time: %s\n", message.GuildID, message.ChannelID, message.Timestamp, message.Author.Username, message.ID, message.Content, time.Now().UTC().String())
 		// var time string
 		var reminder string
+		var time string
 		parameters := strings.TrimSpace(message.Content[len(commandPrefix):])
-		// check for containing "
-		// check indices, if the two are equal spit out error otherwise handle normally
-		if strings.IndexByte(parameters, '"') < strings.LastIndexByte(parameters, '"')+1 {
-			reminder = parameters[strings.IndexByte(parameters, '"') : strings.LastIndexByte(parameters, '"')+1]
+		if strings.Contains(parameters, "\"") {
+			if strings.IndexByte(parameters, '"') == strings.LastIndexByte(parameters, '"') {
+				// send update saying that only one " exists
+				return
+			} else {
+				reminder = parameters[strings.IndexByte(parameters, '"') : strings.LastIndexByte(parameters, '"')+1]
+				fmt.Printf(reminder)
+			}
 		}
-		fmt.Printf(reminder+"%d\n", len(reminder))
-		// keep "" in reminder and trim it out of parameters -> extract the time
-		// if regexp.MustCompile(commandPrefix + "\\s+.*\\s+\\\".*\\\"").MatchString(message.Content) {
-		// time = strings.TrimSpace(message.Content[len(commandPrefix):strings.IndexByte(message.Content, '"')])
-		// reminder = strings.TrimSpace(message.Content[strings.IndexByte(message.Content, '"')-1:])
-		// // len time == 0 if no
-		// fmt.Printf(time+" "+reminder+"%d", len(time))
+		if len(reminder) > 0 {
+			parameters = strings.Trim(parameters, reminder)
+		}
+		time = strings.TrimSpace(parameters)
+		parsedtime, err := dateparse.ParseAny(time)
+		if err != nil {
+			// parsedtime was successful
+		} else {
+			// check for other forms of parsed time
+			// if not successful throw error
+		}
+		// spin up goroutine with sleep using extracted parameters
+		// on goroutine completion send message id through channel
 
-		// 		// go remindMe(message.Message)
-		// 	} else {
-		// 		// not correct command formatting
-		// 	}
+		// write function for extracting all of this stuff
+		// write function for determining time to sleep
+		// have goroutine go to sleep for time
+		// on startup loop through loaded json of messages and extract all of the data
+		// only if the message exists tho
+		// save a list of every message -
+		// loop through every message and clear them out if they are done
+		// on shutdown + startup
+		// delete messages.txt file
+		// spin up a goroutine for each message
+		// goroutine checks for if remindme is still active or not
+		// if so appends to message.txt
+
 	}
 }
 
