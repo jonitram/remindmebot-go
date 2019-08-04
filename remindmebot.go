@@ -81,27 +81,35 @@ func messageHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 		fmt.Printf("GuildID: %s ChannelID: %s Timestamp: %s Username: %s MessageID: %s Content: %s Current Time: %s\n", message.GuildID, message.ChannelID, message.Timestamp, message.Author.Username, message.ID, message.Content, time.Now().UTC().String())
 		// var time string
 		var reminder string
-		var time string
+		var timestring string
 		parameters := strings.TrimSpace(message.Content[len(commandPrefix):])
 		if strings.Contains(parameters, "\"") {
 			if strings.IndexByte(parameters, '"') == strings.LastIndexByte(parameters, '"') {
 				// send update saying that only one " exists
 				return
-			} else {
-				reminder = parameters[strings.IndexByte(parameters, '"') : strings.LastIndexByte(parameters, '"')+1]
-				fmt.Printf(reminder)
 			}
+			reminder = parameters[strings.IndexByte(parameters, '"') : strings.LastIndexByte(parameters, '"')+1]
+			fmt.Printf(reminder)
 		}
 		if len(reminder) > 0 {
 			parameters = strings.Trim(parameters, reminder)
 		}
-		time = strings.TrimSpace(parameters)
-		parsedtime, err := dateparse.ParseAny(time)
-		if err != nil {
-			// parsedtime was successful
-		} else {
-			// check for other forms of parsed time
-			// if not successful throw error
+		timestring = strings.TrimSpace(parameters)
+		fmt.Printf("\nTimestamp: " + timestring)
+		if len(timestring) > 0 {
+			parsedtime, err := dateparse.ParseAny(timestring)
+			if err != nil {
+				// parsedtime was successful
+				fmt.Printf("\nParsed Timestring: " + parsedtime.String())
+			} else {
+				// check for other forms of parsed time
+				// if not successful throw error
+				// timenums := regexp.MustCompile("\\d+").FindStringSubmatch(timestring)
+				// numberInt, err := strconv.Atoi(timenums)
+				if err != nil {
+					// send error message abt not including a number
+				}
+			}
 		}
 		// spin up goroutine with sleep using extracted parameters
 		// on goroutine completion send message id through channel
@@ -118,9 +126,23 @@ func messageHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 		// spin up a goroutine for each message
 		// goroutine checks for if remindme is still active or not
 		// if so appends to message.txt
-
+		// SORT THE LIST OF MESSAGES BY COMPLETION DATE
+		// UPON COMPLETION OF A GOROUTINE - maybe kill a message?
 	}
 }
+
+// func extractDigitIndices(input string) (int, int) {
+// 	for i := 0; i < len(input); i++ {
+// 		if unicode.IsNumber(input[i]) {
+// 			for j := i; j < len(input); j++ {
+// 				if !unicode.isNumber(input[j]) {
+// 					return i, j
+// 				}
+// 			}
+// 		}
+// 	}
+// 	return -1, -1
+// }
 
 func sortDuration(unit string) int {
 	unit = strings.ToLower(unit)
